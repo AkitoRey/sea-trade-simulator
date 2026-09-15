@@ -1,0 +1,43 @@
+# Артефакты компиляции
+*.obj
+*.o
+*.exe
+*.out
+*.app
+
+# Библиотеки
+*.a
+*.lib
+*.so
+*.so.*
+*.dll
+*.dylib
+
+# Отладочная информация
+*.pdb
+*.idb
+*.ilk
+
+# Папки сборки
+build/
+Debug/
+Release/
+x64/
+x86/
+out/
+bin/
+obj/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.sln
+*.vcxproj
+*.vcxproj.*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
