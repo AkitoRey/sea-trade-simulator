@@ -13,6 +13,7 @@ public:
     void Heal(int amount);
     void ContractDisease();
     void Isolate();
+    void Rename(const std::string& name);
 
     const std::string& GetName() const;
     int GetHealth() const;

@@ -1,9 +1,10 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 // Предварительное объявление класса члена экипажа.
-// Ship будет хранить указатель на уже существующий CrewMember.
+// Ship наблюдает за уже существующим CrewMember через weak_ptr.
 class CrewMember;
 
 class Ship
@@ -20,9 +21,12 @@ public:
     // Не позволяет превысить грузоподъёмность.
     void LoadCargo(int weight);
 
-    // Добавляет существующего члена экипажа на корабль.
+    // Назначает на корабль существующего члена экипажа.
     // CrewMember создаётся отдельно — это агрегация.
-    void AddCrewMember(CrewMember& crewMember);
+    void AddCrewMember(const std::shared_ptr<CrewMember>& crewMember);
+
+    // Выводит информацию о члене экипажа, если он ещё существует.
+    void ShowCrewMember() const;
 
     // Возвращает название корабля.
     const std::string& GetName() const;
@@ -46,7 +50,7 @@ private:
     // Текущий вес груза.
     int currentCargo_;
 
-    // Указатель на существующего члена экипажа.
-    // Ship не создаёт и не уничтожает этот объект.
-    CrewMember* crewMember_;
+    // Наблюдатель за членом экипажа.
+    // Ship не владеет этим объектом и не продлевает ему жизнь.
+    std::weak_ptr<CrewMember> crewMember_;
 };

@@ -94,6 +94,11 @@ const std::string& CrewMember::GetName() const
     return name_;
 }
 
+void CrewMember::Rename(const std::string& name)
+{
+    name_ = name;
+}
+
 int CrewMember::GetHealth() const
 {
     return health_;

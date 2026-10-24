@@ -9,8 +9,7 @@
 Ship::Ship(const std::string& name, int cargoCapacity)
     : name_(name),
     cargoCapacity_(cargoCapacity),
-    currentCargo_(0),
-    crewMember_(nullptr)
+    currentCargo_(0)
 {
     // Грузоподъёмность должна быть положительной.
     if (cargoCapacity_ <= 0)
@@ -28,7 +27,7 @@ Ship::~Ship()
     std::cout << "Корабль " << name_ << " уничтожен.\n";
 
     // ВАЖНО:
-    // crewMember_ не удаляется через delete.
+    // crewMember_ - это weak_ptr, он не владеет членом экипажа.
     // Член экипажа существует независимо от корабля.
     // Это демонстрирует агрегацию.
 }
@@ -60,23 +59,44 @@ void Ship::LoadCargo(int weight)
 }
 
 // Добавление члена экипажа.
-void Ship::AddCrewMember(CrewMember& crewMember)
+void Ship::AddCrewMember(const std::shared_ptr<CrewMember>& crewMember)
 {
+    if (!crewMember)
+    {
+        std::cout << "Ошибка: член экипажа не задан.\n";
+        return;
+    }
+
     // На корабле может быть только один член экипажа
     // в рамках нашей демонстрационной модели.
-    if (crewMember_ != nullptr)
+    if (!crewMember_.expired())
     {
         std::cout << "На корабле уже есть член экипажа.\n";
         return;
     }
 
-    // Сохраняем адрес существующего объекта.
-    // Ship НЕ становится его владельцем.
-    crewMember_ = &crewMember;
+    // weak_ptr запоминает объект, но владельцем не становится.
+    crewMember_ = crewMember;
 
-    std::cout << crewMember.GetName()
+    std::cout << crewMember->GetName()
         << " назначен на корабль "
         << name_ << ".\n";
+}
+
+// Вывод информации о члене экипажа.
+void Ship::ShowCrewMember() const
+{
+    // lock() возвращает пустой указатель, если объект уже уничтожен.
+    if (std::shared_ptr<CrewMember> crewMember = crewMember_.lock())
+    {
+        std::cout << "На корабле " << name_ << " служит: "
+            << crewMember->GetName() << ".\n";
+    }
+    else
+    {
+        std::cout << "На корабле " << name_
+            << " нет члена экипажа: объект уже уничтожен или не назначен.\n";
+    }
 }
 
 const std::string& Ship::GetName() const
@@ -96,10 +116,10 @@ int Ship::GetCurrentCargo() const
 
 int Ship::GetCrewSize() const
 {
-    if (crewMember_ != nullptr)
+    if (crewMember_.expired())
     {
-        return 1;
+        return 0;
     }
 
-    return 0;
+    return 1;
 }
