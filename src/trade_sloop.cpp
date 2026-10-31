@@ -10,6 +10,24 @@ TradeSloop::TradeSloop(std::string_view name, int cargoCapacity,
     std::cout << "TradeSloop(): " << GetName() << "\n";
 }
 
+TradeSloop::TradeSloop()
+    : BaseShip{}
+{
+    std::cout << "TradeSloop(): по умолчанию\n";
+}
+
+TradeSloop::TradeSloop(const TradeSloop& other)
+    : BaseShip{ other }
+{
+    std::cout << "TradeSloop(const TradeSloop&): " << GetName() << "\n";
+}
+
+TradeSloop::TradeSloop(TradeSloop&& other) noexcept
+    : BaseShip{ std::move(other) }
+{
+    std::cout << "TradeSloop(TradeSloop&&): " << GetName() << "\n";
+}
+
 TradeSloop::~TradeSloop()
 {
     std::cout << "~TradeSloop: " << GetName() << "\n";

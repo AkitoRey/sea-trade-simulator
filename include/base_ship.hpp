@@ -27,6 +27,7 @@ private:
     std::shared_ptr<Port> homePort_{};
 
 public:
+    // Конструктор с параметрами.
     BaseShip(std::string_view name, int cargoCapacity,
              std::shared_ptr<Port> homePort);
     virtual ~BaseShip();
@@ -52,6 +53,12 @@ public:
     const std::shared_ptr<Port>& GetHomePort() const;
 
 protected:
+    // По умолчанию, копирования и перемещения доступны только наследникам:
+    // так объект наследника нельзя случайно «срезать» до BaseShip.
+    BaseShip();
+    BaseShip(const BaseShip& other);
+    BaseShip(BaseShip&& other) noexcept;
+
     // Нужен наследникам, остальному коду не нужен.
     std::string Header() const;
 };

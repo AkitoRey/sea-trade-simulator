@@ -21,6 +21,38 @@ BaseShip::BaseShip(std::string_view name, int cargoCapacity,
     std::cout << "BaseShip(): " << name_ << "\n";
 }
 
+// По умолчанию: делегирует конструктору с параметрами.
+BaseShip::BaseShip()
+    : BaseShip{ "Без имени", 1, std::make_shared<Port>("Без порта") }
+{
+    std::cout << "(конструктор по умолчанию)\n";
+}
+
+// Копирования: новый корабль получает свой инвентарный номер,
+// экипаж не копируется. Порт пока копируется как указатель
+// (поверхностная копия), в шаге 4 станет глубокой.
+BaseShip::BaseShip(const BaseShip& other)
+    : inventoryNumber_{ NextInventoryNumber() }
+    , name_{ other.name_ }
+    , cargoCapacity_{ other.cargoCapacity_ }
+    , currentCargo_{ other.currentCargo_ }
+    , homePort_{ other.homePort_ }
+{
+    std::cout << "BaseShip(const BaseShip&): " << name_ << "\n";
+}
+
+// Перемещения: данные забираются, у источника остаётся пустая оболочка.
+BaseShip::BaseShip(BaseShip&& other) noexcept
+    : inventoryNumber_{ other.inventoryNumber_ }
+    , name_{ std::move(other.name_) }
+    , cargoCapacity_{ other.cargoCapacity_ }
+    , currentCargo_{ other.currentCargo_ }
+    , crewMember_{ std::move(other.crewMember_) }
+    , homePort_{ std::move(other.homePort_) }
+{
+    std::cout << "BaseShip(BaseShip&&): " << name_ << "\n";
+}
+
 BaseShip::~BaseShip()
 {
     std::cout << "~BaseShip: " << name_ << "\n";

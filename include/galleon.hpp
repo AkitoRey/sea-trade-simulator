@@ -8,6 +8,9 @@ class Galleon final : public BaseShip
 public:
     Galleon(std::string_view name, int cargoCapacity,
             std::shared_ptr<Port> homePort);
+    Galleon();
+    Galleon(const Galleon& other);
+    Galleon(Galleon&& other) noexcept;
     ~Galleon() override;
 
     int GetDraft() const override;

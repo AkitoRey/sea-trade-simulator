@@ -8,6 +8,9 @@ class TradeSloop : public BaseShip
 public:
     TradeSloop(std::string_view name, int cargoCapacity,
                std::shared_ptr<Port> homePort);
+    TradeSloop();
+    TradeSloop(const TradeSloop& other);
+    TradeSloop(TradeSloop&& other) noexcept;
     ~TradeSloop() override;
 
     int GetDraft() const override;

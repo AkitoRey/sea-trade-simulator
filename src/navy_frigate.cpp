@@ -10,6 +10,24 @@ NavyFrigate::NavyFrigate(std::string_view name, int cargoCapacity,
     std::cout << "NavyFrigate(): " << GetName() << "\n";
 }
 
+NavyFrigate::NavyFrigate()
+    : BaseShip{}
+{
+    std::cout << "NavyFrigate(): по умолчанию\n";
+}
+
+NavyFrigate::NavyFrigate(const NavyFrigate& other)
+    : BaseShip{ other }
+{
+    std::cout << "NavyFrigate(const NavyFrigate&): " << GetName() << "\n";
+}
+
+NavyFrigate::NavyFrigate(NavyFrigate&& other) noexcept
+    : BaseShip{ std::move(other) }
+{
+    std::cout << "NavyFrigate(NavyFrigate&&): " << GetName() << "\n";
+}
+
 NavyFrigate::~NavyFrigate()
 {
     std::cout << "~NavyFrigate: " << GetName() << "\n";

@@ -10,6 +10,24 @@ Galleon::Galleon(std::string_view name, int cargoCapacity,
     std::cout << "Galleon(): " << GetName() << "\n";
 }
 
+Galleon::Galleon()
+    : BaseShip{}
+{
+    std::cout << "Galleon(): по умолчанию\n";
+}
+
+Galleon::Galleon(const Galleon& other)
+    : BaseShip{ other }
+{
+    std::cout << "Galleon(const Galleon&): " << GetName() << "\n";
+}
+
+Galleon::Galleon(Galleon&& other) noexcept
+    : BaseShip{ std::move(other) }
+{
+    std::cout << "Galleon(Galleon&&): " << GetName() << "\n";
+}
+
 Galleon::~Galleon()
 {
     std::cout << "~Galleon: " << GetName() << "\n";
