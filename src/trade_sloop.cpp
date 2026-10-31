@@ -33,6 +33,11 @@ TradeSloop::~TradeSloop()
     std::cout << "~TradeSloop: " << GetName() << "\n";
 }
 
+std::unique_ptr<BaseShip> TradeSloop::Clone() const
+{
+    return std::make_unique<TradeSloop>(*this);
+}
+
 int TradeSloop::GetDraft() const
 {
     return 2;

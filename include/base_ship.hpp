@@ -23,7 +23,8 @@ private:
     // Агрегация из ЛР 3: корабль не владеет членом экипажа.
     std::weak_ptr<CrewMember> crewMember_{};
 
-    // Порт приписки. Копируется по-разному: см. копирование в шаге 4.
+    // Порт приписки. Корабли могут делить один порт (поверхностно),
+    // а конструктор копирования даёт копии собственный порт (глубоко).
     std::shared_ptr<Port> homePort_{};
 
 public:
@@ -35,6 +36,9 @@ public:
     // Чисто виртуальные методы: у каждого типа судна своя реализация.
     virtual int GetDraft() const = 0;
     virtual void UseSpecialAction() const = 0;
+
+    // Копия нужного типа через указатель на базовый класс.
+    virtual std::unique_ptr<BaseShip> Clone() const = 0;
 
     // Есть реализация, наследник может её дополнить или заменить.
     virtual std::string Describe() const;
@@ -58,6 +62,8 @@ protected:
     BaseShip();
     BaseShip(const BaseShip& other);
     BaseShip(BaseShip&& other) noexcept;
+    BaseShip& operator=(const BaseShip& other);
+    BaseShip& operator=(BaseShip&& other) noexcept = default;
 
     // Нужен наследникам, остальному коду не нужен.
     std::string Header() const;

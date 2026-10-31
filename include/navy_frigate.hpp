@@ -11,9 +11,12 @@ public:
     NavyFrigate();
     NavyFrigate(const NavyFrigate& other);
     NavyFrigate(NavyFrigate&& other) noexcept;
+    NavyFrigate& operator=(const NavyFrigate& other) = default;
+    NavyFrigate& operator=(NavyFrigate&& other) noexcept = default;
     ~NavyFrigate() override;
 
     int GetDraft() const override;
+    std::unique_ptr<BaseShip> Clone() const override;
     void UseSpecialAction() const override;
     std::string Describe() const override;
 };

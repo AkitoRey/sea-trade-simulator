@@ -11,9 +11,12 @@ public:
     Galleon();
     Galleon(const Galleon& other);
     Galleon(Galleon&& other) noexcept;
+    Galleon& operator=(const Galleon& other) = default;
+    Galleon& operator=(Galleon&& other) noexcept = default;
     ~Galleon() override;
 
     int GetDraft() const override;
+    std::unique_ptr<BaseShip> Clone() const override;
     void UseSpecialAction() const override;
     std::string Describe() const override;
 };

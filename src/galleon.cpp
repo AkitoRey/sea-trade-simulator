@@ -33,6 +33,11 @@ Galleon::~Galleon()
     std::cout << "~Galleon: " << GetName() << "\n";
 }
 
+std::unique_ptr<BaseShip> Galleon::Clone() const
+{
+    return std::make_unique<Galleon>(*this);
+}
+
 int Galleon::GetDraft() const
 {
     return 7;

@@ -88,7 +88,79 @@ int main()
     }
 
     // ---------------------------------------------------------
-    // 3. Композиция и агрегация из ЛР 2-3
+    // 3. Поверхностная и глубокая копия
+    // ---------------------------------------------------------
+
+    std::cout << "\n=== Поверхностная копия: общий порт (shared_ptr) ===\n";
+
+    {
+        const auto harbor = std::make_shared<Port>("Бийск");
+
+        TradeSloop alpha{ "Альфа", 20, harbor };
+        TradeSloop beta{ "Бета", 20, harbor };
+
+        std::cout << "Владельцев порта: " << harbor.use_count() << "\n";
+
+        alpha.GetHomePort()->Rename("Рубцовск");
+
+        std::cout << "Переименовали порт через Альфу.\n";
+        std::cout << alpha.Describe() << "\n";
+        std::cout << beta.Describe() << "\n";
+        std::cout << "Изменился и у Беты: порт общий.\n";
+    }
+
+    std::cout << "\n=== Глубокая копия: конструктор копирования ===\n";
+
+    {
+        TradeSloop original{ "Оригинал", 20,
+                             std::make_shared<Port>("Бийск") };
+        TradeSloop copy = original;
+
+        std::cout << "Владельцев порта у оригинала: "
+                  << original.GetHomePort().use_count() << "\n";
+
+        copy.GetHomePort()->Rename("Рубцовск");
+
+        std::cout << "Переименовали порт у копии.\n";
+        std::cout << "оригинал: " << original.Describe() << "\n";
+        std::cout << "копия:    " << copy.Describe() << "\n";
+        std::cout << "Оригинал не изменился: у копии свой порт.\n";
+    }
+
+    std::cout << "\n=== Клонирование через указатель на базу: Clone() ===\n";
+
+    {
+        const std::unique_ptr<BaseShip> frigate =
+            std::make_unique<NavyFrigate>("Эталон", 50,
+                                          std::make_shared<Port>("Бийск"));
+        const std::unique_ptr<BaseShip> twin = frigate->Clone();
+
+        twin->GetHomePort()->Rename("Рубцовск");
+
+        std::cout << "оригинал: " << frigate->Describe() << "\n";
+        std::cout << "клон:     " << twin->Describe() << "\n";
+        std::cout << "Копия того же типа (фрегат), порт у неё свой.\n";
+    }
+
+    std::cout << "\n=== Присваивание копированием ===\n";
+
+    {
+        TradeSloop first{ "Первый", 20, std::make_shared<Port>("Бийск") };
+        TradeSloop second{ "Второй", 30, std::make_shared<Port>("Томск") };
+
+        second = first;
+        second.GetHomePort()->Rename("Рубцовск");
+
+        std::cout << "first:  " << first.Describe() << "\n";
+        std::cout << "second: " << second.Describe() << "\n";
+
+        // Самоприсваивание через ссылку.
+        TradeSloop& alias = first;
+        first = alias;
+    }
+
+    // ---------------------------------------------------------
+    // 4. Композиция и агрегация из ЛР 2-3
     // ---------------------------------------------------------
 
     std::cout << "\n=== Композиция: компания владеет кораблём ===\n";

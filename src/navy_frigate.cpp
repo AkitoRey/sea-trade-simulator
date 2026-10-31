@@ -33,6 +33,11 @@ NavyFrigate::~NavyFrigate()
     std::cout << "~NavyFrigate: " << GetName() << "\n";
 }
 
+std::unique_ptr<BaseShip> NavyFrigate::Clone() const
+{
+    return std::make_unique<NavyFrigate>(*this);
+}
+
 int NavyFrigate::GetDraft() const
 {
     return 4;

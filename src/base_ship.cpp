@@ -28,15 +28,14 @@ BaseShip::BaseShip()
     std::cout << "(конструктор по умолчанию)\n";
 }
 
-// Копирования: новый корабль получает свой инвентарный номер,
-// экипаж не копируется. Порт пока копируется как указатель
-// (поверхностная копия), в шаге 4 станет глубокой.
+// Копирования (глубокая копия): новый корабль получает свой
+// инвентарный номер и СВОЙ порт, экипаж не копируется.
 BaseShip::BaseShip(const BaseShip& other)
     : inventoryNumber_{ NextInventoryNumber() }
     , name_{ other.name_ }
     , cargoCapacity_{ other.cargoCapacity_ }
     , currentCargo_{ other.currentCargo_ }
-    , homePort_{ other.homePort_ }
+    , homePort_{ std::make_shared<Port>(*other.homePort_) }
 {
     std::cout << "BaseShip(const BaseShip&): " << name_ << "\n";
 }
@@ -51,6 +50,25 @@ BaseShip::BaseShip(BaseShip&& other) noexcept
     , homePort_{ std::move(other.homePort_) }
 {
     std::cout << "BaseShip(BaseShip&&): " << name_ << "\n";
+}
+
+// Присваивание копированием согласовано с конструктором копирования:
+// порт тоже копируется глубоко. Номер и экипаж остаются своими.
+BaseShip& BaseShip::operator=(const BaseShip& other)
+{
+    if (this == &other)
+    {
+        std::cout << "Самоприсваивание: ничего не делаем.\n";
+        return *this;
+    }
+
+    name_ = other.name_;
+    cargoCapacity_ = other.cargoCapacity_;
+    currentCargo_ = other.currentCargo_;
+    homePort_ = std::make_shared<Port>(*other.homePort_);
+
+    std::cout << "BaseShip::operator=(const BaseShip&): " << name_ << "\n";
+    return *this;
 }
 
 BaseShip::~BaseShip()
