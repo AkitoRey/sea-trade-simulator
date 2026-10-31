@@ -1,38 +1,24 @@
 #pragma once
 
+#include <memory>
 #include <string>
+#include <string_view>
 
-#include "ship.hpp"
+#include "base_ship.hpp"
 
-// Торговая компания управляет своим кораблём.
-// Ship хранится внутри TradingCompany, поэтому это композиция.
+// РљРѕРјРїРѕР·РёС†РёСЏ: РєРѕРјРїР°РЅРёСЏ РµРґРёРЅСЃС‚РІРµРЅРЅС‹Р№ РІР»Р°РґРµР»РµС† СЃРІРѕРµРіРѕ РєРѕСЂР°Р±Р»СЏ.
+// BaseShip Р°Р±СЃС‚СЂР°РєС‚РЅС‹Р№, РїРѕСЌС‚РѕРјСѓ РєРѕСЂР°Р±Р»СЊ С…СЂР°РЅРёС‚СЃСЏ С‡РµСЂРµР· unique_ptr.
 class TradingCompany
 {
-public:
-    // Создаёт торговую компанию с названием
-    // и заданными параметрами собственного корабля.
-    TradingCompany(
-        const std::string& name,
-        const std::string& shipName,
-        int cargoCapacity);
+private:
+    std::string name_{};
+    std::unique_ptr<BaseShip> ship_{};
 
-    // Деструктор торговой компании.
+public:
+    TradingCompany(std::string_view name, std::unique_ptr<BaseShip> ship);
     ~TradingCompany();
 
-    // Загружает груз на корабль компании.
     void LoadCargo(int weight);
-
-    // Выводит информацию о компании и её корабле.
     void ShowInfo() const;
-
-    // Возвращает название компании.
     const std::string& GetName() const;
-
-private:
-    // Название торговой компании.
-    std::string name_;
-
-    // Корабль является частью торговой компании.
-    // Он создаётся и уничтожается вместе с ней.
-    Ship ship_;
 };

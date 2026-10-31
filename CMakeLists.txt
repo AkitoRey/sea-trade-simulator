@@ -9,7 +9,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(sea_trade_simulator
     src/main.cpp
     src/crew_member.cpp
-    src/ship.cpp
+    src/port.cpp
+    src/base_ship.cpp
+    src/trade_sloop.cpp
+    src/navy_frigate.cpp
+    src/galleon.cpp
     src/trading_company.cpp
 )
 

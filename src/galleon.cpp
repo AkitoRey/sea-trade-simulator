@@ -1,0 +1,33 @@
+#include "galleon.hpp"
+
+#include <iostream>
+#include <utility>
+
+Galleon::Galleon(std::string_view name, int cargoCapacity,
+                 std::shared_ptr<Port> homePort)
+    : BaseShip{ name, cargoCapacity, std::move(homePort) }
+{
+    std::cout << "Galleon(): " << GetName() << "\n";
+}
+
+Galleon::~Galleon()
+{
+    std::cout << "~Galleon: " << GetName() << "\n";
+}
+
+int Galleon::GetDraft() const
+{
+    return 7;
+}
+
+void Galleon::UseSpecialAction() const
+{
+    std::cout << GetName() << ": залповый огонь и абордажный захват.\n";
+}
+
+// Заменяет метод полностью, без вызова базового.
+std::string Galleon::Describe() const
+{
+    return "Галеон «" + GetName() + "», осадка "
+        + std::to_string(GetDraft()) + " (только глубокие порты)";
+}
