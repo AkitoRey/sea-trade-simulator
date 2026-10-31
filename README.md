@@ -59,3 +59,26 @@ dotnet run --project csharp/SeaTradeSimulator
 ```
 
 Если в консоли Windows вместо русских букв вопросительные знаки, выполните `chcp 65001`.
+
+## Лабораторная работа 4, часть 2 (C#)
+
+Ветка Git: `lab-04-csharp`. Иерархия судов из части 1 (C++) перенесена на C#:
+
+- `BaseShip` — абстрактный базовый класс (`abstract`);
+- `TradeSloop`, `NavyFrigate` — наследники;
+- `Galleon` — `sealed`-класс;
+- `Port` — порт приписки, вложенный объект для демонстрации копирования.
+
+Показаны: `protected`, `: base(...)`, `: this(...)`, `override` с вызовом `base.Describe()` и без него,
+`sealed override`, конструктор копирования, `MemberwiseClone()` (поверхностная и глубокая копия),
+`this`, статическое поле и метод, `Equals`/`GetHashCode`, `using var`, `using static`
+и псевдоним типа (`using Fleet = ...`).
+
+Требуется .NET SDK 8.0 или новее. Команды выполняются из корня репозитория:
+
+```
+dotnet build csharp/SeaTradeSimulator
+dotnet run --project csharp/SeaTradeSimulator
+```
+
+Если в консоли Windows вместо русских букв вопросительные знаки, выполните `chcp 65001`.

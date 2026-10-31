@@ -7,13 +7,14 @@ namespace SeaTradeSimulator
     /// </summary>
     public class TradingCompany
     {
-        // Композиция: корабль создаётся самой компанией и наружу не отдаётся.
-        private readonly Ship _ship;
+        // BaseShip абстрактный, поэтому корабль передаётся готовым.
+        // Компания единственный владелец и наружу его не отдаёт.
+        private readonly BaseShip _ship;
 
-        public TradingCompany(string name, string shipName, int cargoCapacity)
+        public TradingCompany(string name, BaseShip ship)
         {
             Name = name;
-            _ship = new Ship(shipName, cargoCapacity);
+            _ship = ship;
 
             Console.WriteLine($"Торговая компания {Name} создана.");
         }
@@ -27,7 +28,7 @@ namespace SeaTradeSimulator
             Console.WriteLine();
             Console.WriteLine("Информация о торговой компании:");
             Console.WriteLine($"Компания: {Name}");
-            Console.WriteLine($"Корабль: {_ship.Name}");
+            Console.WriteLine($"Корабль: {_ship.Describe()}");
             Console.WriteLine($"Груз: {_ship.CurrentCargo}/{_ship.CargoCapacity} тонн");
         }
 
