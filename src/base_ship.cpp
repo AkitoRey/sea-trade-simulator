@@ -81,6 +81,36 @@ int BaseShip::NextInventoryNumber()
     return ++lastInventoryNumber_;
 }
 
+int BaseShip::GetIssuedNumbersCount()
+{
+    return lastInventoryNumber_;
+}
+
+// Поиск подстроки: find возвращает позицию или npos.
+bool BaseShip::NameContains(std::string_view part) const
+{
+    return name_.find(part) != std::string::npos;
+}
+
+// Первое слово названия: substr до первого пробела.
+// Пробел занимает один байт, поэтому буква в UTF-8 не разрезается.
+std::string BaseShip::FirstWordOfName() const
+{
+    const std::size_t space = name_.find(' ');
+    if (space == std::string::npos)
+    {
+        return name_;
+    }
+
+    return name_.substr(0, space);
+}
+
+// Передача текущего объекта другому объекту.
+void BaseShip::DockAt(const Port& port) const
+{
+    port.Report(*this);
+}
+
 std::string BaseShip::Header() const
 {
     return name_ + " [порт " + homePort_->GetName()

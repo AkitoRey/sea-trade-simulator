@@ -160,7 +160,69 @@ int main()
     }
 
     // ---------------------------------------------------------
-    // 4. Композиция и агрегация из ЛР 2-3
+    // 4. Строки, this, статические члены, final
+    // ---------------------------------------------------------
+
+    std::cout << "\n=== Статический счётчик ===\n";
+
+    std::cout << "Выдано инвентарных номеров: "
+              << BaseShip::GetIssuedNumbersCount() << "\n";
+
+    TradeSloop star{ "Морская звезда", 25, port };
+
+    std::cout << "После создания «" << star.GetName() << "» (№"
+              << star.GetInventoryNumber() << "): "
+              << BaseShip::GetIssuedNumbersCount() << "\n";
+
+    std::cout << "\n=== Строки ===\n";
+
+    // Конкатенация.
+    std::string label = star.GetName() + " / " + star.GetHomePort()->GetName();
+    label += " (шлюп)";
+    std::cout << "Конкатенация: " << label << "\n";
+
+    // Поиск.
+    const std::string part = "звезд";
+    const std::size_t position = star.GetName().find(part);
+    if (position != std::string::npos)
+    {
+        std::cout << "Поиск: «" << part << "» найдено с байта "
+                  << position << "\n";
+    }
+
+    std::cout << "NameContains(\"Ласт\"): ";
+    for (const auto& ship : fleet)
+    {
+        if (ship->NameContains("Ласт"))
+        {
+            std::cout << ship->GetName() << " ";
+        }
+    }
+    std::cout << "\n";
+
+    // Подстрока.
+    std::cout << "Подстрока (первое слово): " << star.FirstWordOfName() << "\n";
+
+    // Сравнение.
+    std::cout << "Сравнение ==: "
+              << (star.GetName() == "Морская звезда" ? "равны" : "не равны")
+              << "\n";
+    std::cout << "Сравнение compare: «" << fleet[0]->GetName() << "» "
+              << (fleet[0]->GetName().compare(fleet[1]->GetName()) < 0
+                      ? "раньше" : "позже")
+              << " «" << fleet[1]->GetName() << "»\n";
+
+    std::cout << "\n=== this: корабль передаёт себя порту ===\n";
+
+    star.DockAt(*port);
+
+    std::cout << "\n=== final ===\n";
+
+    // Galleon помечен final: class Armada : public Galleon {}; не скомпилируется.
+    std::cout << "Galleon final: наследоваться от галеона нельзя.\n";
+
+    // ---------------------------------------------------------
+    // 5. Композиция и агрегация из ЛР 2-3
     // ---------------------------------------------------------
 
     std::cout << "\n=== Композиция: компания владеет кораблём ===\n";

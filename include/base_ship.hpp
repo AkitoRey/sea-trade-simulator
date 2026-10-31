@@ -43,7 +43,16 @@ public:
     // Есть реализация, наследник может её дополнить или заменить.
     virtual std::string Describe() const;
 
+    // Статические члены: номер выдаётся один на все суда.
     static int NextInventoryNumber();
+    static int GetIssuedNumbersCount();
+
+    // Строки: поиск и выделение подстроки.
+    bool NameContains(std::string_view part) const;
+    std::string FirstWordOfName() const;
+
+    // this: корабль передаёт себя порту.
+    void DockAt(const Port& port) const;
 
     void LoadCargo(int weight);
     void AddCrewMember(const std::shared_ptr<CrewMember>& crewMember);
