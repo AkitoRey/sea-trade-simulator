@@ -1,0 +1,22 @@
+#pragma once
+
+#include "base_ship.hpp"
+
+// Тяжёлый галеон. final: подклассов у галеона не будет.
+class Galleon final : public BaseShip
+{
+public:
+    Galleon(std::string_view name, int cargoCapacity,
+            std::shared_ptr<Port> homePort);
+    Galleon();
+    Galleon(const Galleon& other);
+    Galleon(Galleon&& other) noexcept;
+    Galleon& operator=(const Galleon& other) = default;
+    Galleon& operator=(Galleon&& other) noexcept = default;
+    ~Galleon() override;
+
+    int GetDraft() const override;
+    std::unique_ptr<BaseShip> Clone() const override;
+    void UseSpecialAction() const override;
+    std::string Describe() const override;
+};
