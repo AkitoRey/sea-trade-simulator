@@ -1,150 +1,216 @@
-﻿using System.Text;
-using static System.Math;
-using Fleet = System.Collections.Generic.List<SeaTradeSimulator.BaseShip>;
+using SeaTradeSimulator;
 
-namespace SeaTradeSimulator
+Ui.Init();
+if (args.Contains("--fast"))
 {
-    /// <summary>
-    /// Курсовой проект: игровой симулятор управления торговым судном
-    /// и морскими маршрутами. Выполнила: Соколова Д. С., группа ПИ-51.
-    /// </summary>
-    public static class Program
+    Ui.Fast = true;
+}
+// Без аргументов запускается игра; ключ --demo показывает по пунктам все задания ЛР.
+if (!args.Contains("--demo"))
+{
+    new Game().Run();
+    return;
+}
+
+static void Section(string title) => Console.WriteLine($"\n=== {title} ===");
+
+var port = new Port("Барнаул");
+var strictPort = new Port("Бийск", bansContraband: true);   // контрабанда запрещена
+
+var fleet = new List<BaseShip>
+{
+    new TradeSloop("Ласточка", 40, port),
+    new NavyFrigate("Стерегущий", 80, port, 2),
+    new Galleon("Громовержец", 200, port),
+};
+
+// ---------------------------------------------------------------
+Section("1. Интерфейс IArmed: метод не знает конкретных классов");
+{
+    // Одна и та же функция работает с фрегатом, галеоном и береговой батареей.
+    var frigate = (NavyFrigate)fleet[1];
+    var galleon = (Galleon)fleet[2];
+    var battery = new CoastalBattery("Старый форт", 6, 3);
+
+    Operations.RepelPirates(frigate, 40);
+    Operations.RepelPirates(galleon, 100);
+    Operations.RepelPirates(battery, 25);
+}
+
+// ---------------------------------------------------------------
+Section("2. Один класс + интерфейс: BaseShip + IArmed");
+{
+    var galleon = new Galleon("Левиафан", 300, port);
+    BaseShip asShip = galleon;   // как судно
+    IArmed asArmed = galleon;    // как вооружённая единица
+    Console.WriteLine($"  как BaseShip: {asShip.Describe()}");
+    Console.WriteLine($"  как IArmed:   {asArmed.UnitName}, мощность {asArmed.Firepower}");
+    Console.WriteLine($"  это один и тот же объект: {object.ReferenceEquals(asShip, asArmed)}");
+}
+
+// ---------------------------------------------------------------
+Section("3. Раннее (new) и позднее (override) связывание");
+foreach (BaseShip ship in fleet)   // статический тип переменной — BaseShip
+{
+    Console.WriteLine($"  GetKind()  (new, раннее):          {ship.GetKind()}");
+    Console.WriteLine($"  Describe() (override, позднее):    {ship.Describe()}");
+}
+{
+    var sloop = (TradeSloop)fleet[0];
+    Console.WriteLine($"  Та же «Ласточка» через переменную TradeSloop: GetKind() = {sloop.GetKind()}");
+}
+
+// ---------------------------------------------------------------
+Section("4. is и as: воевать может только то, что реализует IArmed");
+foreach (BaseShip ship in fleet)
+{
+    Operations.MeetPirates(ship, 40);
+}
+{
+    IArmed? maybe = fleet[0] as IArmed;   // null, если не реализует
+    Console.WriteLine($"  «{fleet[0].Name}» as IArmed = {(maybe is null ? "null" : "объект")}");
+    try
     {
-        public static void Main()
-        {
-            Console.OutputEncoding = Encoding.UTF8;
-
-            Console.WriteLine("=== Лабораторная работа 4, часть 2 (C#) ===");
-            Console.WriteLine();
-
-            var port = new Port("Барнаул");
-
-            // 1. Иерархия: список базового типа, объекты разных наследников.
-            Console.WriteLine("=== Создание судов (порядок конструкторов) ===");
-
-            var fleet = new Fleet
-            {
-                new TradeSloop("Ласточка", 40, port),
-                new NavyFrigate("Стерегущий", 80, port),
-                new Galleon("Громовержец", 200, port),
-            };
-
-            Console.WriteLine();
-            Console.WriteLine("=== Работа через ссылку на базовый класс ===");
-
-            foreach (BaseShip ship in fleet)
-            {
-                Console.WriteLine(ship.Describe());
-                ship.UseSpecialAction();
-            }
-
-            Console.WriteLine();
-            Console.WriteLine("=== this(...): галеон без указания грузоподъёмности ===");
-
-            var defaultGalleon = new Galleon("Левиафан", port);
-            Console.WriteLine($"Грузоподъёмность: {defaultGalleon.CargoCapacity}");
-
-            // 2. Поверхностная и глубокая копия.
-            Console.WriteLine();
-            Console.WriteLine("=== Поверхностная копия: MemberwiseClone ===");
-
-            var original = new TradeSloop("Оригинал", 20, new Port("Бийск"));
-            var shallow = (TradeSloop)original.ShallowCopy();
-
-            shallow.HomePort.Name = "Рубцовск";
-
-            Console.WriteLine($"Один и тот же порт: {ReferenceEquals(original.HomePort, shallow.HomePort)}");
-            Console.WriteLine($"оригинал: {original.Describe()}");
-            Console.WriteLine($"копия:    {shallow.Describe()}");
-            Console.WriteLine("Порт изменился и у оригинала: он общий.");
-
-            Console.WriteLine();
-            Console.WriteLine("=== Глубокая копия: MemberwiseClone + замена порта ===");
-
-            var deep = (TradeSloop)original.DeepCopy();
-
-            deep.HomePort.Name = "Томск";
-
-            Console.WriteLine($"Один и тот же порт: {ReferenceEquals(original.HomePort, deep.HomePort)}");
-            Console.WriteLine($"оригинал: {original.Describe()}");
-            Console.WriteLine($"копия:    {deep.Describe()}");
-
-            Console.WriteLine();
-            Console.WriteLine("=== Глубокая копия: конструктор копирования ===");
-
-            var copy = new TradeSloop(original);
-
-            copy.HomePort.Name = "Омск";
-
-            Console.WriteLine($"оригинал: {original.Describe()}");
-            Console.WriteLine($"копия:    {copy.Describe()}");
-
-            // 3. this.
-            Console.WriteLine();
-            Console.WriteLine("=== this: корабль передаёт себя порту ===");
-
-            fleet[0].DockAt(port);
-
-            // 4. Статические члены.
-            Console.WriteLine();
-            Console.WriteLine("=== Статический счётчик ===");
-
-            Console.WriteLine($"Выдано инвентарных номеров: {BaseShip.IssuedNumbersCount}");
-            Console.WriteLine($"Следующий номер: {BaseShip.NextInventoryNumber()}");
-
-            // 5. Сравнение по содержимому.
-            Console.WriteLine();
-            Console.WriteLine("=== Equals и GetHashCode ===");
-
-            var twin = new TradeSloop("Ласточка", 10, new Port("Другой порт"));
-
-            Console.WriteLine($"fleet[0] == twin (ссылки): {ReferenceEquals(fleet[0], twin)}");
-            Console.WriteLine($"fleet[0].Equals(twin): {fleet[0].Equals(twin)}");
-            Console.WriteLine($"Хеши равны: {fleet[0].GetHashCode() == twin.GetHashCode()}");
-
-            var unique = new HashSet<BaseShip> { fleet[0], twin };
-            Console.WriteLine($"В HashSet из двух «Ласточек»: {unique.Count}");
-
-            // 6. Композиция и агрегация.
-            Console.WriteLine();
-            Console.WriteLine("=== Композиция: компания владеет кораблём ===");
-
-            {
-                var company = new TradingCompany(
-                    "Atlantic Trade", new Galleon("Торговец", 150, port));
-
-                company.LoadCargo(100);
-                company.ShowInfo();
-            }
-
-            Console.WriteLine();
-            Console.WriteLine("=== Агрегация: корабль хранит ссылку на члена экипажа ===");
-
-            var sailor = new CrewMember("Иван", 100);
-
-            fleet[0].AddCrewMember(sailor);
-            Console.WriteLine($"Размер экипажа: {fleet[0].CrewSize}");
-
-            // 7. using.
-            Console.WriteLine();
-            Console.WriteLine("=== using var, using static, псевдоним типа ===");
-
-            Console.WriteLine($"Кораблей в списке Fleet: {fleet.Count}");
-            Console.WriteLine($"Свободно в трюме шлюпа: {Max(0, fleet[0].CargoCapacity - fleet[0].CurrentCargo)} тонн");
-
-            ShowUsingDeclaration();
-            Console.WriteLine("Метод завершён: журнал уже закрыт.");
-
-            Console.WriteLine();
-            Console.WriteLine("=== Конец программы ===");
-        }
-
-        private static void ShowUsingDeclaration()
-        {
-            using var log = new VoyageLog("Рейс №2");
-
-            log.Write("корабль вышел из порта");
-            log.Write("метод заканчивается");
-        }
+        var armed = (IArmed)fleet[0];     // явное приведение бросает InvalidCastException
+        armed.Fire("цель");
+    }
+    catch (InvalidCastException)
+    {
+        Console.WriteLine($"  «{fleet[0].Name}» не реализует IArmed: InvalidCastException");
     }
 }
+
+// ---------------------------------------------------------------
+Section("5. Конфигурирование: тактика капитана в шторм");
+{
+    BaseShip galleon = fleet[2];
+    BaseShip sloop = fleet[0];
+
+    static void Reload(BaseShip ship, int tons)
+    {
+        ship.UnloadCargo(ship.CurrentCargo);
+        ship.LoadCargo(tons);
+    }
+
+    Reload(galleon, 100);
+    Reload(sloop, 30);
+
+    // Статическое конфигурирование: тактика задана при создании капитана.
+    var captain = new Captain("Беринг", new PushOnTactic());
+    Console.WriteLine($"  Шлюп «{sloop.Name}», груз {sloop.CurrentCargo} т");
+    captain.FaceStorm(sloop, 7);
+
+    // Динамическое конфигурирование: тот же капитан получает другой объект поведения.
+    Reload(sloop, 30);
+    captain.Tactic = new ChangeRouteTactic();
+    captain.FaceStorm(sloop, 7);
+
+    Reload(sloop, 30);
+    captain.Tactic = new WaitOutTactic();
+    captain.FaceStorm(sloop, 7);
+
+    Console.WriteLine($"  Галеон «{galleon.Name}» (осадка {galleon.Draft}) в том же шторме, тактика «напролом»:");
+    captain.Tactic = new PushOnTactic();
+    captain.FaceStorm(galleon, 7);
+
+    galleon.UnloadCargo(galleon.CurrentCargo);
+    sloop.UnloadCargo(sloop.CurrentCargo);
+}
+
+// ---------------------------------------------------------------
+Section("6. Исключения");
+
+Console.WriteLine("-- 6.1. Переполнение трюма: создаёт BaseShip.LoadCargo, ловит LoadAcrossFleet --");
+{
+    int left = Operations.LoadAcrossFleet(fleet, 300);
+    Console.WriteLine($"  не поместилось: {left} т");
+    foreach (BaseShip ship in fleet)
+    {
+        Console.WriteLine($"  {ship.Describe()}");
+    }
+    foreach (BaseShip ship in fleet)
+    {
+        ship.UnloadCargo(ship.CurrentCargo);
+    }
+}
+
+Console.WriteLine("-- 6.2. После отказа состояние судна не изменилось --");
+{
+    BaseShip sloop = fleet[0];
+    sloop.LoadCargo(35);
+    try
+    {
+        sloop.LoadCargo(10);   // свободно только 5 т
+    }
+    catch (CargoCapacityExceededException error)   // частный тип — первым
+    {
+        Console.WriteLine($"  {error.Message}");
+    }
+    catch (SeaTradeException error)                // затем общий для предметной области
+    {
+        Console.WriteLine($"  ошибка правил: {error.Message}");
+    }
+    Console.WriteLine($"  груз после отказа: {sloop.CurrentCargo} т (было 35)");
+    sloop.UnloadCargo(35);
+}
+
+Console.WriteLine("-- 6.3. Запрещённый товар (правило 9), блок finally --");
+{
+    var rum = new CargoLot("ром", 5, false);
+    var smuggled = new CargoLot("контрабандный шёлк", 3, true);
+    Operations.SellAtPort(strictPort, rum);        // успешное действие
+    Operations.SellAtPort(strictPort, smuggled);   // нарушение правила: исключение перехвачено внутри
+    Operations.SellAtPort(port, smuggled);         // в этом порту запрета нет
+}
+
+Console.WriteLine("-- 6.4. Боезапас --");
+try
+{
+    var frigate = new NavyFrigate("Дозорный", 50, port, 1);   // боезапас: один залп
+    frigate.Fire("пират №1");                                 // успешное действие
+    frigate.Fire("пират №2");                                 // боезапас кончился
+}
+catch (OutOfAmmunitionException error)
+{
+    Console.WriteLine($"  {error.Message}");
+}
+
+Console.WriteLine("-- 6.5. Ошибки программиста: ArgumentException --");
+try
+{
+    fleet[0].LoadCargo(-5);
+}
+catch (ArgumentOutOfRangeException error)   // частный тип — первым
+{
+    Console.WriteLine($"  ArgumentOutOfRangeException: {error.ParamName}");
+}
+try
+{
+    _ = new TradeSloop("", 10, port);
+}
+catch (ArgumentException error)             // общий тип — после частного
+{
+    Console.WriteLine($"  ArgumentException при создании судна: {error.ParamName}");
+}
+
+Console.WriteLine("-- 6.6. using: журнал закрывается и при исключении --");
+try
+{
+    Operations.LoadShipment(fleet[0], 20);   // успешно: журнал закрылся при выходе из метода
+    Operations.LoadShipment(fleet[0], 99);   // исключение: журнал закроется при выходе из блока using
+}
+catch (SeaTradeException error)
+{
+    Console.WriteLine($"  перехвачено выше: {error.Message}");
+}
+
+// ---------------------------------------------------------------
+Section("7. Стандартный интерфейс IComparable<BaseShip>");
+{
+    BaseShip[] ships = fleet.ToArray();
+    Console.WriteLine("  до сортировки:   " + string.Join(", ", ships.Select(s => s.Name)));
+    Array.Sort(ships);   // Array.Sort знает только о IComparable
+    Console.WriteLine("  после сортировки: " + string.Join(", ", ships.Select(s => s.Name)));
+}
+
+Section("Конец программы");

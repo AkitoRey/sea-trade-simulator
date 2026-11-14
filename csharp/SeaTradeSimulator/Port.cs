@@ -1,22 +1,35 @@
-﻿using System;
+namespace SeaTradeSimulator;
 
-namespace SeaTradeSimulator
+/// <summary>Партия груза: товар, масса, признак контрабанды.</summary>
+public record CargoLot(string GoodName, int Tons, bool Contraband);
+
+public class Port
 {
-    /// <summary>
-    /// Порт приписки: вложенный объект корабля.
-    /// На нём видна разница между поверхностной и глубокой копией.
-    /// </summary>
-    public class Port
+    public string Name { get; set; }
+    public bool BansContraband { get; }
+
+    public Port(string name, bool bansContraband = false)
     {
-        public Port(string name)
+        Name = name;
+        BansContraband = bansContraband;
+    }
+
+    public void Report(BaseShip ship) =>
+        Console.WriteLine($"Порт {Name}: принят корабль {ship.Name}.");
+
+    /// <summary>Только проверка правила 9, без вывода: бросает ForbiddenGoodsException.</summary>
+    public void CheckAcceptable(CargoLot lot)
+    {
+        if (lot.Contraband && BansContraband)
         {
-            Name = name;
+            throw new ForbiddenGoodsException(lot.GoodName, Name);
         }
+    }
 
-        public string Name { get; set; }
-
-        // this: корабль передаёт сам себя порту.
-        public void Report(BaseShip ship) =>
-            Console.WriteLine($"Порт {Name}: принят корабль {ship.Name}.");
+    /// <summary>Бросает ForbiddenGoodsException, если товар запрещён в этом порту.</summary>
+    public void Sell(CargoLot lot)
+    {
+        CheckAcceptable(lot);
+        Console.WriteLine($"  порт {Name}: куплено «{lot.GoodName}», {lot.Tons} т");
     }
 }
